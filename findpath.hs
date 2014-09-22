@@ -37,8 +37,8 @@ import qualified Data.Heap as H
 type Cell = (Int, Int)
 type Path = [Cell]
 type CellGrid = [[Char]]
-data CellLink = CellLink Cell (Maybe CellLink)
-data CellDist = CellDist CellLink Double
+data CellLink = CellLink Cell (Maybe CellLink) deriving (Show)
+data CellDist = CellDist CellLink Double deriving (Show)
 type Candidates = (H.MinHeap CellDist, S.Set CellLink) 
 
 instance Ord CellDist where
@@ -64,7 +64,12 @@ parseAndFindPath input =
     in
         case findPath grid start target of
             Nothing -> "No path found"
-            Just path -> drawPath grid path
+            Just path ->
+                "Input:\n" ++ echoOut ++ "\nSolution:\n" ++ resultOut
+                where
+                    echoOut = drawPath grid []
+                    resultOut =  drawPath grid $ drop 1 path
+                
 
 findStartTarget :: [[Char]] -> Maybe (Cell, Cell)
 findStartTarget grid =
@@ -80,7 +85,8 @@ findCharInGrid :: [[Char]] -> Char -> [Cell]
 findCharInGrid grid char = concat $ map addRow $ zip [0..] $ map (findChar char) grid
 
 findChar :: Char -> [Char] -> [Int]
-findChar char chars = map (fst) $ filter ((== char) . snd) $ zip [0..] chars
+findChar char chars = 
+    map (fst) $ filter ((== char) . snd) $ zip [0..] chars
 
 addRow :: (a, [b]) -> [(a,b)]
 addRow (n, l) = zip (repeat n) $ l
@@ -126,8 +132,9 @@ search cells target candidates seen
             newSeen = S.union seen newNeighborSet
             neighborWeights = toCellDists newNeighbors nextToVisit target
             newCands = foldl (addCandidate) candidates neighborWeights
+            reachedTarget = S.member target newNeighborSet
         in
-            if S.member target newNeighborSet
+            if reachedTarget
             then
                 Just (toPath $ toLink nextToVisit target)
             else
@@ -160,23 +167,24 @@ availableCells cellList col num
 availableCells _ _ 0 = []
 availableCells cellList col num =
     let subList = zip [col..col+num-1] $ drop col cellList
-        isAvailable (_, char) = char == ' '
+        isAvailable (_, char) = (char == ' ') || (char == 'X')
     in  
         take num $ map fst $ filter (isAvailable) subList
 
 drawPath :: CellGrid -> Path -> String
 drawPath grid path =
-    L.intercalate "\n" $ map (addPath pathSet) numbered
+    output ++ "\n\n"
     where
         pathSet = S.fromList path
         numbered = zip [0..] grid 
+        output = L.intercalate "\n" $ map (addPath pathSet) numbered
 
 addPath :: S.Set Cell -> (Int, [Char]) -> [Char]
 addPath set (row, cols) = map (outChar set) $ zip3 (repeat row) [0..] cols
         
 outChar :: S.Set Cell -> (Int, Int, Char) -> Char
 outChar overlay (row, col, char) =
-    if S.member (row, col) overlay then '+' else char
+    if S.member (row, col) overlay then 'o' else char
     
 dist2 :: Cell -> Cell -> Double
 dist2 (r1, c1) (r2, c2) = (fromIntegral (r1-r2))^2 + (fromIntegral (c1-c2))^2
