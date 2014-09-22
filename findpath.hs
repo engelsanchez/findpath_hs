@@ -61,15 +61,14 @@ parseAndFindPath input =
     let
         grid = lines input
         Just (start, target) = findStartTarget grid
+        echoOut = drawPath grid []
     in
         case findPath grid start target of
-            Nothing -> "No path found"
+            Nothing -> "Input:\n" ++ echoOut ++ "\nNo path found\n"
             Just path ->
                 "Input:\n" ++ echoOut ++ "\nSolution:\n" ++ resultOut
                 where
-                    echoOut = drawPath grid []
                     resultOut =  drawPath grid $ drop 1 path
-                
 
 findStartTarget :: [[Char]] -> Maybe (Cell, Cell)
 findStartTarget grid =
@@ -131,7 +130,7 @@ search cells target candidates seen
             newNeighborSet = S.fromList $ newNeighbors
             newSeen = S.union seen newNeighborSet
             neighborWeights = toCellDists newNeighbors nextToVisit target
-            newCands = foldl (addCandidate) candidates neighborWeights
+            newCands = foldl (addCandidate) cand1 neighborWeights
             reachedTarget = S.member target newNeighborSet
         in
             if reachedTarget
