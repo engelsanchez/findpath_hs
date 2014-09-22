@@ -1,31 +1,26 @@
 {-
  - Takes an ASCII map as input and finds a path between a starting and
- - ending position. In the input map spaces represent available cells,
+ - ending position using the A* search algorithm.
+ - In the input map spaces represent available cells,
  - the character 'o' is the starting position, the character 'X' is
  - the ending position and any other character is considered an
  - unavailable cell:
  -
  - ******************************
- - *********   *****   |-X   ****
- - **   o------*******/    ******
- - ***        |-------     ******
+ - *********   *****     X   ****
+ - **   o      *******     ******
+ - ***                     ******
  - **......               ...****
  - ******************************
  -
+ - The solution is printed by extending 'o' chars all the way to the 'X':
  -
- -}
-
-{-
- - We need a list of cells.
- - The main algorithm uses the following:
- -   - A set of candidate nodes, where you can lookup the best
- -     one according to a given heuristic (distance to target)
- -     For each candidate node, we know the node from which we
- -     visited it to link back to a path.
- -   - A set of visited cells so you can quickly check if a node
- -     has been seen already. Each visited cells has a linked to
- -     the cell from which it was visited.
- -   - A mapping from one cell to all its neighbors
+ - ******************************
+ - *********   *****   ooX   ****
+ - **   ooooooo*******o    ******
+ - ***         ooooooo     ******
+ - **......               ...****
+ - ******************************
  -
  -}
 
